@@ -1,6 +1,6 @@
 var $$svg, clientId, clientIds, currentHref, drawPoints, mapHeight, mapWidth, trafficData, xScale, yScale;
 
-currentHref = location.pathname.split('/')[1] || 'index';
+currentHref = _.last(location.pathname.split('/')) || 'index';
 
 $('.sidebar').find('a[href^=\'' + currentHref + '\']').parent().addClass('active');
 
