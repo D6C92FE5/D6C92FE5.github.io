@@ -1,8 +1,17 @@
-var $$svg, clientId, clientIds, currentHref, drawPoints, mapHeight, mapWidth, trafficData, xScale, yScale;
+var $$svg, $sidebar, $sidebarToggle, clientId, clientIds, currentHref, drawPoints, mapHeight, mapWidth, trafficData, xScale, yScale;
 
 currentHref = _.last(location.pathname.split('/')) || 'index';
 
-$('.sidebar').find('a[href^=\'' + currentHref + '\']').parent().addClass('active');
+$sidebar = $('.sidebar');
+
+$sidebar.find('a[href^=\'' + currentHref + '\']').parent().addClass('active');
+
+$sidebarToggle = $('.sidebar-toggle');
+
+$('.sidebar-toggle, .sidebar .mask').click(function() {
+  $sidebarToggle.children('i').toggleClass('fa-navicon fa-times');
+  return $sidebar.toggle();
+});
 
 clientIds = ['a', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];
 
