@@ -1,4 +1,4 @@
-var $$svg, $sidebar, $sidebarToggle, clientId, clientIds, currentHref, drawPoints, mapHeight, mapWidth, trafficData, xScale, yScale;
+var $$current, $$svg, $$track, $sidebar, $sidebarToggle, clientId, clientIds, currentHref, drawPoints, entries, hideTrack, mapHeight, mapWidth, showTrack, trafficData, xScale, yScale;
 
 currentHref = _.last(location.pathname.split('/')) || 'index';
 
@@ -35,24 +35,26 @@ trafficData = (function() {
 
 $$svg = d3.select('.traffic-box svg');
 
+$$current = $$svg.select('.current');
+
+$$track = $$svg.select('.track');
+
 xScale = d3.scale.linear().domain([0, mapWidth]).range([0, 100]).clamp(true);
 
 yScale = d3.scale.linear().domain([0, mapHeight]).range([0, 100]).clamp(true);
 
 drawPoints = function(data) {
-  var circle;
-  circle = $$svg.selectAll('circle').data(data, function(d) {
+  var circles;
+  circles = $$current.selectAll('circle').data(data, function(d) {
     return d.clientId;
   });
-  circle.enter().append('circle').attr('class', 'point').attr('r', 5);
-  return circle.transition().attr('cx', function(d) {
+  circles.enter().append('circle').on('click', showTrack).attr('class', 'point').attr('r', 5);
+  return circles.transition().attr('cx', function(d) {
     return xScale(d.x) + '%';
   }).attr('cy', function(d) {
     return yScale(d.y) + '%';
   });
 };
-
-drawPoints(trafficData);
 
 setInterval(function() {
   var data, item, _i, _len;
@@ -63,4 +65,65 @@ setInterval(function() {
     item.y = Math.abs(item.y + _.random(-50, 50));
   }
   return drawPoints(data);
-}, 3000);
+}, 300000);
+
+entries = [
+  {
+    x: 340,
+    y: 0
+  }, {
+    x: 0,
+    y: 180
+  }, {
+    x: 550,
+    y: 500
+  }, {
+    x: 700,
+    y: 80
+  }
+];
+
+showTrack = function(d) {
+  $$track.append('circle').on('click', hideTrack).attr('class', 'point').attr('r', 5).attr('cx', xScale(d.x) + '%').attr('cy', yScale(d.y) + '%');
+  return $$current.transition().style('opacity', 0).each('end', function() {
+    var drawTrack, i, points;
+    $$current.classed('hide', true);
+    points = (function() {
+      var _i, _len, _ref, _results;
+      _ref = _.range(0, _.random(2, 6));
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        i = _ref[_i];
+        _results.push({
+          x: _.random(mapWidth),
+          y: _.random(mapHeight)
+        });
+      }
+      return _results;
+    })();
+    points.unshift(_.sample(entries));
+    points.push(d);
+    drawTrack = function(i) {
+      var p1, p2;
+      p1 = points[i];
+      p2 = points[i + 1];
+      return $$track.append('circle').on('click', hideTrack).attr('class', 'point').attr('r', 5).attr('cx', xScale(p1.x) + '%').attr('cy', yScale(p1.y) + '%').style('opacity', 0).transition().style('opacity', 1).each('end', function() {
+        return $$track.insert('line', ":first-child").attr('class', 'track').attr('x1', xScale(p1.x) + '%').attr('y1', yScale(p1.y) + '%').attr('x2', xScale(p1.x) + '%').attr('y2', yScale(p1.y) + '%').transition().duration(1000).attr('x2', xScale(p2.x) + '%').attr('y2', yScale(p2.y) + '%').each('end', function() {
+          if (i < points.length - 2) {
+            return drawTrack(i + 1);
+          }
+        });
+      });
+    };
+    return drawTrack(0);
+  });
+};
+
+hideTrack = function(d) {
+  return $$track.selectAll('*').transition().style('opacity', 0).each('end', function() {
+    d3.select(this).remove();
+    return $$current.classed('hide', false).transition().style('opacity', 1);
+  });
+};
+
+drawPoints(trafficData);
