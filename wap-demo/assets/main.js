@@ -175,7 +175,12 @@ if (page === 'traffic') {
     }
   ];
   showTrack = function(d) {
-    $$track.append('circle').on('click', hideTrack).attr('class', 'point').attr('r', 5).attr('cx', xScale(d.x) + '%').attr('cy', yScale(d.y) + '%');
+    var dest;
+    dest = {
+      x: d.x,
+      y: d.y
+    };
+    $$track.append('circle').on('click', hideTrack).attr('class', 'point').attr('r', 5).attr('cx', xScale(dest.x) + '%').attr('cy', yScale(dest.y) + '%');
     return $$current.transition().style('opacity', 0).each('end', function() {
       var drawTrack, points;
       $$current.classed('hide', true);
@@ -193,7 +198,7 @@ if (page === 'traffic') {
         return _results;
       })();
       points.unshift(_.sample(entries));
-      points.push(d);
+      points.push(dest);
       drawTrack = function(i) {
         var p1, p2;
         p1 = points[i];
